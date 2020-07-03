@@ -1,0 +1,17 @@
+provider "aws" {
+  region                  = "${var.region}"
+  
+  access_key = "KEY"
+  secret_key = "SUPERSECRET"
+}
+
+terraform {
+  backend "s3" {
+    bucket = "BUCKETNAME"
+    region = "us-east-1"
+    key = "KEYFORSTATE"
+    access_key = "KEY"
+    secret_key = "SUPERSECRET"
+    encrypt = "true"
+  }
+}
