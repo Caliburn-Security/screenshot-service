@@ -64,7 +64,7 @@ def get_screenshot(url, s3_bucket, screenshot_title = None):
         logger.info(f"Obtaining screenshot for {url}")
         driver.get(url)
         if screenshot_title is None: 
-            screenshot_title = time.time()
+            screenshot_title = f"{url}_{time.time()}"
         driver.save_screenshot(f"/tmp/{screenshot_title}.png") # TODO: Delete the screenshot after
         logger.info(f"Uploading /tmp/{screenshot_title}.png to S3 bucket {s3_bucket}/{screenshot_title}.png")
         s3 = boto3.client("s3")
