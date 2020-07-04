@@ -15,6 +15,7 @@ import boto3
 import stat
 import urllib.request
 from zipfile import ZipFile
+from tld import get_tld
 
 #HEADLESS_CHROME = "https://github.com/adieuadieu/serverless-chrome/releases/download/v1.0.0-54/stable-headless-chromium-amazonlinux-2017-03.zip"
 #CHROMEDRIVER    = "https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip"
@@ -64,7 +65,7 @@ def get_screenshot(url, s3_bucket, screenshot_title = None):
         logger.info(f"Obtaining screenshot for {url}")
         driver.get(url)
         if screenshot_title is None: 
-            screenshot_title = f"{url}_{time.time()}"
+            screenshot_title = f"{get_tld(url)}_{time.time()}"
         driver.save_screenshot(f"/tmp/{screenshot_title}.png") # TODO: Delete the screenshot after
         logger.info(f"Uploading /tmp/{screenshot_title}.png to S3 bucket {s3_bucket}/{screenshot_title}.png")
         s3 = boto3.client("s3")
@@ -74,7 +75,7 @@ def handler(event, context):
     logger.debug(f"Event: {event}")
     logger.info("Validating url")  
 
-    bucket_name = os.environ("s3_bucket")
+    bucket_name = os.environ["s3_bucket"]
 
     if event["httpMethod"] == "GET":
         if event["queryStringParameters"]:
