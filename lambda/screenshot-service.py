@@ -71,7 +71,7 @@ def get_screenshot(url, s3_bucket, screenshot_title = None):
         driver.save_screenshot(f"/tmp/{screenshot_title}.png") # TODO: Delete the screenshot after
         logger.info(f"Uploading /tmp/{screenshot_title}.png to S3 bucket {s3_bucket}/{screenshot_title}.png")
         s3 = boto3.client("s3")
-        s3.upload_file(f"/tmp/{screenshot_title}.png", s3_bucket, f"{screenshot_title}.png")
+        s3.upload_file(f"/tmp/{screenshot_title}.png", s3_bucket, f"{screenshot_title}.png", ExtraArgs={'ContentType': 'image/png', 'ACL': 'public-read'})
     return f"https://{s3_bucket}.s3.amazonaws.com/{screenshot_title}.png"
 
 def handler(event, context): 
