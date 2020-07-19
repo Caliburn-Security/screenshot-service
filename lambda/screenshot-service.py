@@ -80,7 +80,7 @@ def handler(event, context):
 
     bucket_name = os.environ["s3_bucket"]
 
-    if event.has_key("url"): # Using this for testing in lambda.
+    if "url" in event: # Using this for testing in lambda.
             try:
                 url = event["url"]
             except Exception as e:
