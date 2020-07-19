@@ -31,12 +31,12 @@ resource "aws_api_gateway_account" "apigw_account" {
 #  }
 #}
 
-resource "aws_api_gateway_method" "take_screenshot_post" {
+/* resource "aws_api_gateway_method" "take_screenshot_post" {
   rest_api_id   = aws_api_gateway_rest_api.screenshot_api.id
   resource_id   = aws_api_gateway_resource.screenshot_api_gateway.id
   http_method   = "POST"
   authorization = "NONE"
-}
+} */
 
 resource "aws_api_gateway_method" "take_screenshot_get" {
   rest_api_id   = aws_api_gateway_rest_api.screenshot_api.id
@@ -45,7 +45,13 @@ resource "aws_api_gateway_method" "take_screenshot_get" {
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "lambda_integration_post" {
+resource "aws_api_gateway_stage" "prod_stage" {
+  stage_name = "prod"
+  rest_api_id = aws_api_gateway_rest_api.screenshot_api.id
+  deployment_id = aws_api_gateway_deployment.api_gateway_deployment_get.id
+}
+
+/* resource "aws_api_gateway_integration" "lambda_integration_post" {
   depends_on = [
     aws_lambda_permission.apigw
   ]
@@ -57,7 +63,7 @@ resource "aws_api_gateway_integration" "lambda_integration_post" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.take_screenshot.invoke_arn
-}
+} */
 
 resource "aws_api_gateway_integration" "lambda_integration_get" {
   depends_on = [
@@ -72,11 +78,11 @@ resource "aws_api_gateway_integration" "lambda_integration_get" {
   uri                     = aws_lambda_function.take_screenshot.invoke_arn
 }
 
-resource "aws_api_gateway_deployment" "api_gateway_deployment_post" {
+/* resource "aws_api_gateway_deployment" "api_gateway_deployment_post" {
   depends_on = [aws_api_gateway_integration.lambda_integration_post,  aws_api_gateway_method.take_screenshot_post]
 
   rest_api_id = aws_api_gateway_rest_api.screenshot_api.id
-}
+} */
 
 resource "aws_api_gateway_deployment" "api_gateway_deployment_get" {
   depends_on = [aws_api_gateway_integration.lambda_integration_get,  aws_api_gateway_method.take_screenshot_get]
