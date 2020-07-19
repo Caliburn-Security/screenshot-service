@@ -85,7 +85,9 @@ resource "aws_iam_role_policy" "lambda_s3_access" {
       "Effect": "Allow",
       "Action": [
         "s3:ListBuckets",
-        "s3:PutObject"
+        "s3:PutObject",
+        "s3:PutObjectAcl",
+        "s3:GetObjectAcl"
       ],
       "Resource": ["*"]
     }
