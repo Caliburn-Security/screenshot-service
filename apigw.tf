@@ -51,6 +51,26 @@ resource "aws_api_gateway_stage" "prod_stage" {
   deployment_id = aws_api_gateway_deployment.api_gateway_deployment_get.id
 }
 
+resource "aws_api_gateway_usage_plan" "apigw_usage_plan" {
+  name = "apigw_usage_plan"
+
+  api_stages {
+    api_id = aws_api_gateway_rest_api.screenshot_api.id
+    stage = aws_api_gateway_stage.prod_stage.stage_name
+  }
+}
+
+resource "aws_api_gateway_usage_plan_key" "apigw_usage_plan_key" {
+  key_id = aws_api_gateway_api_key.apigw_prod_key.id
+  key_type = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.apigw_usage_plan.id
+}
+
+resource "aws_api_gateway_api_key" "apigw_prod_key" {
+  name = "prod_key"
+}
+
+
 /* resource "aws_api_gateway_integration" "lambda_integration_post" {
   depends_on = [
     aws_lambda_permission.apigw
