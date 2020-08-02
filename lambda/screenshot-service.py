@@ -14,7 +14,6 @@ from shutil import copyfile
 import boto3
 import stat
 import urllib.request
-from zipfile import ZipFile
 import tldextract
 
 # Configure logging
@@ -61,7 +60,7 @@ def get_screenshot(url, s3_bucket, screenshot_title = None):
 
     if screenshot_title is None: 
         ext = tldextract.extract(url)
-        domain = f"{''.join(ext[:2])}.{ext[2]}"
+        domain = f"{''.join(ext[:2])}:{urlparse(url).port}.{ext[2]}"
         screenshot_title = f"{domain}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
     logger.debug(f"Screenshot title: {screenshot_title}")
 
@@ -78,11 +77,15 @@ def get_screenshot(url, s3_bucket, screenshot_title = None):
     return f"https://{s3_bucket}.s3.amazonaws.com/{screenshot_title}.png"
 
 def handler(event, context): 
-    logger.debug(f"Event: {event}")
-    logger.info("Validating url")  
+    logger.debug("## ENVIRONMENT VARIABLES ##")
+    logger.debug(os.environ)
+    logger.debug("## EVENT ##")
+    logger.debug(event)
 
     bucket_name = os.environ["s3_bucket"]
+    logger.debug(f"bucket_name: {bucket_name}")
 
+    logger.info("Validating url")  
     if "url" in event: # Using this for testing in lambda.
             try:
                 url = event["url"]
@@ -117,13 +120,10 @@ def handler(event, context):
                 }
         else:
             return {
-                "statusCode": 400,
+                "statusCode": 405,
                 "body": json.dumps(f"Invalid HTTP Method {event['httpMethod']} supplied")
             }
 
-
-        
-    
     logger.info(f"Decoding {url}")
     url = unquote(url)
 
@@ -131,7 +131,13 @@ def handler(event, context):
     try: 
         parsed_url = urlparse(url)
         if parsed_url.scheme != "http" and parsed_url.scheme != "https":
-            url = f"http://{url}"
+            logger.info("No valid scheme found, defaulting to http://")
+            parsed_url = urlparse(f"http://{url}")
+        if parsed_url.port is None:
+            if parsed_url.scheme == "http":
+                parsed_url = urlparse(f"{parsed_url.geturl()}:80")
+            elif parsed_url.scheme == "https":
+                parsed_url = urlparse(f"{parsed_url.geturl()}:443")
 
     except Exception as e: 
         logger.error(e)
@@ -139,13 +145,13 @@ def handler(event, context):
     
     logger.info("Getting screenshot")
     try: 
-        screenshot_url = get_screenshot(url, bucket_name) # TODO: Variable!
+        screenshot_url = get_screenshot(parsed_url.geturl(), bucket_name) # TODO: Variable!
     except Exception as e:  
         logger.error(e)
         raise e
 
     response_body = {
-        "message": f"Successfully captured screenshot of {url}",
+        "message": f"Successfully captured screenshot of {parsed_url.geturl()}",
         "screenshot_url": screenshot_url
     }
 
