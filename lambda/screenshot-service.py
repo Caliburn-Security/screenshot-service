@@ -38,6 +38,9 @@ def get_screenshot(url, s3_bucket, screenshot_title = None):
 
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless')
+    chrome_options.add_argument("disable-infobars")
+    chrome_options.add_argument("enable-automation")
+    
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('--window-size=1280x1696')
