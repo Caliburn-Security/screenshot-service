@@ -1,5 +1,5 @@
 output "api_gateway_url" {
-  value = "${aws_api_gateway_deployment.api_gateway_deployment_get.invoke_url}/${aws_api_gateway_stage.prod_stage.stage_name}/${aws_api_gateway_resource.screenshot_api_gateway.path_part}"
+  value = "${aws_api_gateway_stage.prod_stage.invoke_url}/${aws_api_gateway_resource.screenshot_api_gateway.path_part}"
 }
 
 output "api_key" {
