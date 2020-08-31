@@ -21,6 +21,7 @@ resource "aws_api_gateway_method" "take_screenshot_get" {
   resource_id   = aws_api_gateway_resource.screenshot_api_gateway.id
   http_method   = "GET"
   authorization = "NONE"
+  api_key_required = true
 }
 
 resource "aws_api_gateway_method" "take_screenshot_post" {
@@ -28,6 +29,7 @@ resource "aws_api_gateway_method" "take_screenshot_post" {
   resource_id   = aws_api_gateway_resource.screenshot_api_gateway.id
   http_method   = "POST"
   authorization = "NONE"
+  api_key_required = true
 }
 
 

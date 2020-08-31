@@ -1,5 +1,5 @@
 provider "aws" {
-  region                  = "${var.region}"
+  region                  = "var.default_aws_region"
   
   access_key = "KEY"
   secret_key = "SUPERSECRET"
@@ -14,4 +14,8 @@ terraform {
     secret_key = "SUPERSECRET"
     encrypt = "true"
   }
+}
+
+provider "cloudflare" {
+  api_token = "6Jeci9-He7L1h-0jP7yQ1syDclO0MbADYbiWyoxK"
 }

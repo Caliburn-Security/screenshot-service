@@ -7,7 +7,7 @@ resource "aws_lambda_function" "take_screenshot" {
 
   source_code_hash = filebase64sha256("./screenshot-service.zip")
   timeout          = 600
-  memory_size      = 512 # 11: Timeout cut in half when doubling memory to 256. Should take less than 25 seconds now.
+  memory_size      = 512 
   layers = ["${aws_lambda_layer_version.chromedriver_layer.arn}"]
 
   environment {
