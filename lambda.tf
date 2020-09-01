@@ -1,3 +1,21 @@
+resource "aws_lambda_function" "process_screenshot" {
+  filename      = "./screenshot-service-processor.zip"
+  function_name = "process_screenshot"
+  role          = aws_iam_role.lambda_exec_role.arn
+  handler       = "screenshot-service-processor.handler"
+  runtime       = "python3.7"
+
+  source_code_hash = filebase64sha256("./screenshot-service-processor.zip")
+  timeout          = 600
+  memory_size      = 256 
+
+  environment {
+    variables = {
+      s3_bucket = "${aws_s3_bucket.screenshot_bucket.bucket}"
+    }
+  }
+}
+
 resource "aws_lambda_function" "take_screenshot" {
   filename      = "./screenshot-service.zip"
   function_name = "take_screenshot"
@@ -9,12 +27,6 @@ resource "aws_lambda_function" "take_screenshot" {
   timeout          = 600
   memory_size      = 512 
   layers = ["${aws_lambda_layer_version.chromedriver_layer.arn}"]
-
-  environment {
-    variables = {
-      s3_bucket = "${aws_s3_bucket.screenshot_bucket.bucket}"
-    }
-  }
 }
 
 resource "aws_lambda_layer_version" "chromedriver_layer" {
@@ -69,6 +81,28 @@ resource "aws_iam_role_policy" "lambda_logging" {
 }
 EOF
 
+}
+
+resource "aws_iam_role_policy" "lambda_invoke_function" {
+  name = "lambda_invoke_function"
+
+  role = aws_iam_role.lambda_exec_role.id
+
+  # TODO: Change resource to be more restrictive
+  policy = <<EOF
+{
+  "Version"  : "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Resource": ["*"]
+    }
+  ]
+}
+EOF
 }
 
 resource "aws_iam_role_policy" "lambda_s3_access" {

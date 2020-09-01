@@ -2,7 +2,7 @@ resource "aws_api_gateway_rest_api" "screenshot_api" {
   name        = "screenshot_api"
   description = "Lambda-powered screenshot API"
   depends_on = [
-    aws_lambda_function.take_screenshot
+    aws_lambda_function.process_screenshot
   ]
 }
 
@@ -16,7 +16,7 @@ resource "aws_api_gateway_account" "apigw_account" {
   cloudwatch_role_arn = aws_iam_role.apigw_cloudwatch.arn
 }
 
-resource "aws_api_gateway_method" "take_screenshot_get" {
+resource "aws_api_gateway_method" "process_screenshot_get" {
   rest_api_id   = aws_api_gateway_rest_api.screenshot_api.id
   resource_id   = aws_api_gateway_resource.screenshot_api_gateway.id
   http_method   = "GET"
@@ -24,7 +24,7 @@ resource "aws_api_gateway_method" "take_screenshot_get" {
   api_key_required = true
 }
 
-resource "aws_api_gateway_method" "take_screenshot_post" {
+resource "aws_api_gateway_method" "process_screenshot_post" {
   rest_api_id   = aws_api_gateway_rest_api.screenshot_api.id
   resource_id   = aws_api_gateway_resource.screenshot_api_gateway.id
   http_method   = "POST"
@@ -63,12 +63,12 @@ resource "aws_api_gateway_integration" "lambda_integration_get" {
     aws_lambda_permission.apigw
   ]
   rest_api_id = aws_api_gateway_rest_api.screenshot_api.id
-  resource_id = aws_api_gateway_method.take_screenshot_get.resource_id
-  http_method = aws_api_gateway_method.take_screenshot_get.http_method
+  resource_id = aws_api_gateway_method.process_screenshot_get.resource_id
+  http_method = aws_api_gateway_method.process_screenshot_get.http_method
 
   integration_http_method = "POST" # https://github.com/hashicorp/terraform/issues/9271 Lambda requires POST as the integration type
   type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.take_screenshot.invoke_arn
+  uri                     = aws_lambda_function.process_screenshot.invoke_arn
 }
 
 resource "aws_api_gateway_integration" "lambda_integration_post" {
@@ -76,16 +76,16 @@ resource "aws_api_gateway_integration" "lambda_integration_post" {
     aws_lambda_permission.apigw
   ]
   rest_api_id = aws_api_gateway_rest_api.screenshot_api.id
-  resource_id = aws_api_gateway_method.take_screenshot_post.resource_id
-  http_method = aws_api_gateway_method.take_screenshot_post.http_method
+  resource_id = aws_api_gateway_method.process_screenshot_post.resource_id
+  http_method = aws_api_gateway_method.process_screenshot_post.http_method
 
   integration_http_method = "POST" # https://github.com/hashicorp/terraform/issues/9271 Lambda requires POST as the integration type
   type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.take_screenshot.invoke_arn
+  uri                     = aws_lambda_function.process_screenshot.invoke_arn
 }
 
 resource "aws_api_gateway_deployment" "api_gateway_deployment_get" {
-  depends_on = [aws_api_gateway_integration.lambda_integration_get,  aws_api_gateway_method.take_screenshot_get, aws_api_gateway_integration.lambda_integration_post, aws_api_gateway_method.take_screenshot_post]
+  depends_on = [aws_api_gateway_integration.lambda_integration_get,  aws_api_gateway_method.process_screenshot_get, aws_api_gateway_integration.lambda_integration_post, aws_api_gateway_method.process_screenshot_post]
 
   rest_api_id = aws_api_gateway_rest_api.screenshot_api.id
 }
@@ -93,7 +93,7 @@ resource "aws_api_gateway_deployment" "api_gateway_deployment_get" {
 resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.take_screenshot.arn
+  function_name = aws_lambda_function.process_screenshot.arn
   principal     = "apigateway.amazonaws.com"
 
   source_arn = "${aws_api_gateway_rest_api.screenshot_api.execution_arn}/*/*/*"

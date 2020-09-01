@@ -86,6 +86,7 @@ def handler(event, context):
     logger.debug(f"bucket_name: {bucket_name}")
 
     logger.info("Validating url")  
+    urls = None
     if "url" in event: # Using this for testing in lambda.
             try:
                 url = event["url"]
@@ -109,7 +110,13 @@ def handler(event, context):
             if event["body"]:
                 try:
                     body = json.loads(event["body"])
-                    url = body["url"]
+                    if "urls" in body and "url" not in body:
+                        logger.info(f"{len(body['urls'])} urls submitted for processing")
+                        urls = body["urls"]
+                        body.pop("urls", None)
+                        logger.debug(f"nullcheck: {'urls' in body}")
+                    else:
+                        url = body["url"]
                 except Exception as e:
                     logger.error(e)
                     raise e
@@ -124,6 +131,29 @@ def handler(event, context):
                 "body": json.dumps(f"Invalid HTTP Method {event['httpMethod']} supplied")
             }
 
+        if urls is not None:
+            logger.debug("urls is not None")
+            logger.debug(f"context.function_name: {context.function_name}")
+            # Recurse!!
+            for url in urls:            
+                logger.info(f"Processing url: {url}")
+                lambda_cli = boto3.client("lambda")
+                body = json.loads(event["body"])
+                body["url"] = url
+                event["body"] = json.dumps(body)
+                lambda_cli.invoke(FunctionName=context.function_name, InvocationType="Event", Payload=json.dumps(event))
+            response_body = {
+                "message": f"{len(urls)} urls will be scanned"
+            }
+            return {
+                "statusCode": 200,
+                "body": json.dumps(response_body)
+            }
+        else:
+            logger.debug("Processing URL")
+            return process_url(url, bucket_name)
+
+def process_url(url, bucket_name):
     logger.info(f"Decoding {url}")
     url = unquote(url)
 

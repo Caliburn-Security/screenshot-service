@@ -1,7 +1,13 @@
 data "archive_file" "screenshot_service_zip" {
   type        = "zip"
-  source_dir  = "./lambda"
+  source_dir  = "./lambda/screenshot-service"
   output_path = "./screenshot-service.zip"
+}
+
+data "archive_file" "screenshot_service_processor_szip" {
+  type        = "zip"
+  source_dir  = "./lambda/screenshot-service-processor"
+  output_path = "./screenshot-service-processor.zip"
 }
 
 data "archive_file" "screenshot_service_layers_zip" {
