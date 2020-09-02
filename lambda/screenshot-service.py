@@ -70,6 +70,12 @@ def get_screenshot(url, s3_bucket, screenshot_title = None):
         logger.info(f"Obtaining screenshot for {url}")
         driver.get(url)     
         
+        sw = driver.execute_script("return document.body.scrollWidth")
+        if sw < 1024:
+            sw = 1024
+
+        driver.set_window_size(sw, driver.execute_script("return document.body.scrollHeight")+100)
+
         driver.save_screenshot(f"/tmp/{screenshot_title}.png") # TODO: Delete the screenshot after
         logger.info(f"Uploading /tmp/{screenshot_title}.png to S3 bucket {s3_bucket}/{screenshot_title}.png")
         s3 = boto3.client("s3")
