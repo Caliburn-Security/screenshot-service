@@ -31,3 +31,15 @@ variable "use_custom_domain" {
   default = false
   description = "Determine if a custom domain will be used"
 }
+
+variable "https_default" {
+  type = bool
+  default = true
+  description = "Use https instead of http if no scheme is provided"
+}
+
+variable "use_cf_for_dns" {
+  type = bool
+  default = false
+  description = "Use Cloudflare when validating the certificate when using a custom domain"
+}
