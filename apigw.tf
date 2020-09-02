@@ -24,13 +24,13 @@ resource "aws_api_gateway_method" "take_screenshot_get" {
   api_key_required = true
 }
 
-resource "aws_api_gateway_method" "take_screenshot_post" {
+/* resource "aws_api_gateway_method" "take_screenshot_post" {
   rest_api_id   = aws_api_gateway_rest_api.screenshot_api.id
   resource_id   = aws_api_gateway_resource.screenshot_api_gateway.id
   http_method   = "POST"
   authorization = "NONE"
   api_key_required = true
-}
+} */
 
 
 resource "aws_api_gateway_stage" "prod_stage" {
@@ -71,7 +71,7 @@ resource "aws_api_gateway_integration" "lambda_integration_get" {
   uri                     = aws_lambda_function.take_screenshot.invoke_arn
 }
 
-resource "aws_api_gateway_integration" "lambda_integration_post" {
+/* resource "aws_api_gateway_integration" "lambda_integration_post" {
   depends_on = [
     aws_lambda_permission.apigw
   ]
@@ -82,10 +82,10 @@ resource "aws_api_gateway_integration" "lambda_integration_post" {
   integration_http_method = "POST" # https://github.com/hashicorp/terraform/issues/9271 Lambda requires POST as the integration type
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.take_screenshot.invoke_arn
-}
+} */
 
 resource "aws_api_gateway_deployment" "api_gateway_deployment_get" {
-  depends_on = [aws_api_gateway_integration.lambda_integration_get,  aws_api_gateway_method.take_screenshot_get, aws_api_gateway_integration.lambda_integration_post, aws_api_gateway_method.take_screenshot_post]
+  depends_on = [aws_api_gateway_integration.lambda_integration_get,  aws_api_gateway_method.take_screenshot_get, /*aws_api_gateway_integration.lambda_integration_post, aws_api_gateway_method.take_screenshot_post*/]
 
   rest_api_id = aws_api_gateway_rest_api.screenshot_api.id
 }
