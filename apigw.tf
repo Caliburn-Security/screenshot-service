@@ -18,6 +18,12 @@ resource "aws_api_gateway_resource" "dns_api_gateway" {
   rest_api_id = aws_api_gateway_rest_api.screenshot_api.id
 }
 
+resource "aws_api_gateway_resource" "analysis_api_gateway" {
+  path_part = "analysis"
+  parent_id   = aws_api_gateway_rest_api.screenshot_api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.screenshot_api.id
+}
+
 resource "aws_api_gateway_account" "apigw_account" {
   cloudwatch_role_arn = aws_iam_role.apigw_cloudwatch.arn
 }
@@ -33,6 +39,14 @@ resource "aws_api_gateway_method" "take_screenshot_get" {
 resource "aws_api_gateway_method" "dns_records_get" {
   rest_api_id   = aws_api_gateway_rest_api.screenshot_api.id
   resource_id   = aws_api_gateway_resource.dns_api_gateway.id
+  http_method   = "GET"
+  authorization = "NONE"
+  api_key_required = true
+}
+
+resource "aws_api_gateway_method" "analysis_records_get" {
+  rest_api_id   = aws_api_gateway_rest_api.screenshot_api.id
+  resource_id   = aws_api_gateway_resource.analysis_api_gateway.id
   http_method   = "GET"
   authorization = "NONE"
   api_key_required = true
@@ -85,7 +99,7 @@ resource "aws_api_gateway_integration" "lambda_integration_get" {
   uri                     = aws_lambda_function.take_screenshot.invoke_arn
 }
 
-resource "aws_api_gateway_integration" "lambda_integrationdns__get" {
+resource "aws_api_gateway_integration" "lambda_integrationdns_dns_get" {
   depends_on = [
     aws_lambda_permission.apigw_dns
   ]
@@ -96,6 +110,19 @@ resource "aws_api_gateway_integration" "lambda_integrationdns__get" {
   integration_http_method = "POST" # https://github.com/hashicorp/terraform/issues/9271 Lambda requires POST as the integration type
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.get_dns_records.invoke_arn
+}
+
+resource "aws_api_gateway_integration" "lambda_integrationdns_analysis_get" {
+  depends_on = [
+    aws_lambda_permission.apigw_analysis
+  ]
+  rest_api_id = aws_api_gateway_rest_api.screenshot_api.id
+  resource_id = aws_api_gateway_method.analysis_records_get.resource_id
+  http_method = aws_api_gateway_method.analysis_records_get.http_method
+
+  integration_http_method = "POST" # https://github.com/hashicorp/terraform/issues/9271 Lambda requires POST as the integration type
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.get_analysis_records.invoke_arn
 }
 
 /* resource "aws_api_gateway_integration" "lambda_integration_post" {

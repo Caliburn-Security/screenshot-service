@@ -14,10 +14,9 @@ def handler(event, context):
     logger.debug(os.environ)
     logger.debug("## EVENT ##")
     logger.debug(event)   
-    logger.debug(len(event)) 
-    logger.debug(event["queryStringParameters"])
 
-    if event["queryStringParameters"] is None or "FQDN" not in event["queryStringParaemters"]:
+
+    if event["queryStringParameters"] is None or "FQDN" not in event["queryStringParameters"]:
         resp = {
             "message": "Please submit a valid FQDN"
         }
