@@ -43,3 +43,21 @@ variable "use_cf_for_dns" {
   default = false
   description = "Use Cloudflare when validating the certificate when using a custom domain"
 }
+
+variable "dns_resolver_timeout" {
+  type = number
+  default = 1
+  description = "Set the DNS resolver timeout in seconds"
+}
+
+variable "dns_resolver_lifetime" {
+  type = number
+  default = 1
+  description = "Set the DNS query lifetime in seconds"
+}
+
+variable "dns_record_types" {
+  type = list(string)
+  default = ["MX", "AAAA", "A", "NS", "SOA", "CNAME", "TXT"]
+  description = "Default DNS record types to check"
+}

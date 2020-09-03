@@ -17,6 +17,26 @@ resource "aws_lambda_function" "take_screenshot" {
   }
 }
 
+resource "aws_lambda_function" "get_dns_records" {
+  filename = "./dns-service.zip"
+  function_name = "get_dns_records"
+  role = aws_iam_role.lambda_exec_role.arn
+  handler = "dns-service.handler"
+  runtime = "python3.7"
+
+  source_code_hash = filebase64sha256("./dns-service.zip")
+  timeout = 150
+  memory_size = 128
+
+  environment {
+    variables = {
+      "RESOLVER_TIMEOUT" = var.dns_resolver_timeout,
+      "RESOLVER_LIFETIME" = var.dns_resolver_lifetime,
+      "DNS_RECORD_TYPES" = jsonencode(var.dns_record_types)
+    }
+  }
+}
+
 resource "aws_lambda_layer_version" "chromedriver_layer" {
   filename = "./chromedriver_lambda_layer.zip"
   layer_name = "chromedriver-binaries"
