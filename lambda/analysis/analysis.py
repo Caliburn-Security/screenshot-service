@@ -30,17 +30,21 @@ def handler(event, context):
     headers = {
         "x-api-key": os.environ["apigw_key"]
     }
-
+    logger.info(f"https://api.caliburnsecurity.com/screenshot?url={url.geturl()}")
     r = requests.get(f"https://api.caliburnsecurity.com/screenshot?url={url.geturl()}", headers=headers)
     data = r.json()
+    logger.debug(f"SCREENSHOT DEBUG: {data}")
 
     if r.status_code != 200:
         warnings.append(data["message"])
     else:
         resp["screenshot_url"] = data["screenshot_url"]
 
-    r = requests.get(f"https://api.caliburnsecurity.com/dns?FQDN={url.netloc}", headers=headers)
+    logger.debug(f"FQDN: {url.netloc.split(':')[0]}")
+
+    r = requests.get(f"https://api.caliburnsecurity.com/dns?FQDN={url.netloc.split(':')[0]}", headers=headers)
     data = r.json()
+    logger.debug(f"DNS DATA: {data}")
 
     if r.status_code != 200:
         warnings.append(data["message"])
@@ -54,7 +58,7 @@ def handler(event, context):
         "body": json.dumps(resp)
     }
     
-def get_url(url, https_default=os.environ["https_default"]):
+def get_url(url, https_default=bool(os.environ["https_default"])):
     logger.info(f"Decoding {url}")
     url = unquote(url)
 
@@ -64,7 +68,7 @@ def get_url(url, https_default=os.environ["https_default"]):
         if url.scheme != "http" and url.scheme != "https":
             url = urlparse(f"https://{url}") if https_default == True else urlparse(f"http://{url}")
         if url.port is None:
-            url = urlparse(f"{url.geturl()}:443") if https_default == True else urlparse(f"{url.geturl():80}")
+            url = urlparse(f"{url.geturl()}:443") if https_default == True else urlparse(f"{url.geturl()}:80")
     except Exception as e:
         logger.error(e)
         return {
@@ -72,7 +76,5 @@ def get_url(url, https_default=os.environ["https_default"]):
             "message": "Invalid URL provided",
             "error": str(e)
         }
+    logger.info(f"URL: {url.geturl()}")
     return url
-
-if __name__ == "__main__":
-    main()

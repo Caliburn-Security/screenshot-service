@@ -122,7 +122,7 @@ resource "aws_api_gateway_integration" "lambda_integrationdns_analysis_get" {
 
   integration_http_method = "POST" # https://github.com/hashicorp/terraform/issues/9271 Lambda requires POST as the integration type
   type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.get_analysis_records.invoke_arn
+  uri                     = aws_lambda_function.get_analysis.invoke_arn
 }
 
 /* resource "aws_api_gateway_integration" "lambda_integration_post" {
@@ -139,7 +139,7 @@ resource "aws_api_gateway_integration" "lambda_integrationdns_analysis_get" {
 } */
 
 resource "aws_api_gateway_deployment" "api_gateway_deployment_get" {
-  depends_on = [aws_api_gateway_integration.lambda_integration_get,  aws_api_gateway_method.take_screenshot_get, /*aws_api_gateway_integration.lambda_integration_post, aws_api_gateway_method.take_screenshot_post*/]
+  depends_on = [aws_api_gateway_integration.lambda_integration_get,  aws_api_gateway_method.take_screenshot_get, aws_api_gateway_method.dns_records_get, aws_api_gateway_method.analysis_records_get /*aws_api_gateway_integration.lambda_integration_post, aws_api_gateway_method.take_screenshot_post*/]
 
   rest_api_id = aws_api_gateway_rest_api.screenshot_api.id
 }
@@ -157,6 +157,15 @@ resource "aws_lambda_permission" "apigw_dns" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.get_dns_records.arn
+  principal     = "apigateway.amazonaws.com"
+
+  source_arn = "${aws_api_gateway_rest_api.screenshot_api.execution_arn}/*/*/*"
+}
+
+resource "aws_lambda_permission" "apigw_analysis" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.get_analysis.arn
   principal     = "apigateway.amazonaws.com"
 
   source_arn = "${aws_api_gateway_rest_api.screenshot_api.execution_arn}/*/*/*"
