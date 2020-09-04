@@ -37,6 +37,25 @@ resource "aws_lambda_function" "get_dns_records" {
   }
 }
 
+resource "aws_lambda_function" "get_analysis" {
+  filename = "./analysis.zip"
+  function_name = "get_analysis"
+  role = aws_iam_role.lambda_exec_role.arn
+  handler = "analysis.handler"
+  runtime = "python3.7"
+
+  source_code_hash = filebase64sha256("./analysis.zip")
+  timeout = 600
+  memory_size = 256
+
+  environment {
+    variables = {
+      "https_default" = true,
+      "apigw_key" = aws_api_gateway_api_key.apigw_prod_key.value
+    }
+  }
+}
+
 resource "aws_lambda_layer_version" "chromedriver_layer" {
   filename = "./chromedriver_lambda_layer.zip"
   layer_name = "chromedriver-binaries"

@@ -60,7 +60,7 @@ def get_screenshot(url, s3_bucket, screenshot_title = None):
 
     if screenshot_title is None: 
         ext = tldextract.extract(url)
-        domain = f"{''.join(ext[:2])}:{urlparse(url).port}.{ext[2]}"
+        domain = f"{''.join(ext[:2])}.{ext[2]}:{urlparse(url).port}"
         screenshot_title = f"{domain}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
     logger.debug(f"Screenshot title: {screenshot_title}")
 
@@ -82,7 +82,7 @@ def get_screenshot(url, s3_bucket, screenshot_title = None):
         s3.upload_file(f"/tmp/{screenshot_title}.png", s3_bucket, f"{screenshot_title}.png", ExtraArgs={'ContentType': 'image/png', 'ACL': 'public-read'})
     return f"https://{s3_bucket}.s3.amazonaws.com/{screenshot_title}.png"
 
-def handler(event, context): 
+def handler(event, context):  
     logger.debug("## ENVIRONMENT VARIABLES ##")
     logger.debug(os.environ)
     logger.debug("## EVENT ##")
